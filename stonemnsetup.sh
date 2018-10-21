@@ -24,7 +24,7 @@ COIN_PATH='/usr/local/bin/'
 COIN_REPO='https://github.com/stonecoinproject/stonecoin'
 COIN_TGZ='https://github.com/stonecoinproject/Stonecoin/releases/download/v2.1.0.1-9523a37/stonecore-2.1.0-linux64.tar.gz'
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
-SENTINEL_REPO='N/A'
+SENTINEL_REPO=''
 COIN_NAME='Stone'
 COIN_PORT=22323
 RPC_PORT=22324
@@ -41,6 +41,11 @@ ADDNODE6=''
 DATE=$(date +"%Y%m%d%H%M")
 NODEIP=$(curl -s4 icanhazip.com)
 BOOTSTRAPURL='https://github.com/stonecoinproject/Stonecoin/releases/download/Bootstrapv2.0/stonecore.tar.gz'
+
+#syncmanager
+SYNC_SCRIPT_URL="https://raw.githubusercontent.com/stonecoinproject/stonemnsetup/master/stonesyncmanager.sh"
+synccroncmd="bash /root/.stonesyncmanager/stonesyncmanager.sh"
+synccronjob="0 */8 * * * $synccroncmd"
 
 BLUE="\033[0;34m"
 YELLOW="\033[0;33m"
@@ -74,9 +79,16 @@ purgeOldInstallation() {
     #remove binaries and Stone utilities
     cd /usr/local/bin && sudo rm $OLD_COIN_CLI $OLD_COIN_TX $OLD_COIN_DAEMON > /dev/null 2>&1 && sleep 2 && cd
     cd /usr/local/bin && sudo rm $COIN_CLI $COIN_TX $COIN_DAEMON > /dev/null 2>&1 && sleep 2 && cd
+    unInstallSyncManager
     echo -e "${GREEN}* Done${NONE}";
 }
 
+unInstallSyncManager(){
+( crontab -l | grep -v -F "$synccroncmd" ) | crontab - >/dev/null 2>&1
+sleep 1
+rm -rf ~/.stonesyncmanager >/dev/null 2>&1
+sleep 1
+}
 
 function download_node() {
   echo -e "${GREEN}Downloading and Installing VPS $COIN_NAME Daemon${NC}"
@@ -90,6 +102,27 @@ function download_node() {
   cp $COIN_DAEMON $COIN_CLI $COIN_PATH
   cd ~ >/dev/null 2>&1
   rm -rf $TMP_FOLDER >/dev/null 2>&1
+}
+
+installSyncManager(){
+echo -e "${GREEN}Downloading and Installing STONE Sync Manager${NC}"
+mkdir ~/.stonesyncmanager >/dev/null 2>&1
+wget -q $SYNC_SCRIPT_URL
+chmod 775 stonesyncmanager.sh >/dev/null 2>&1
+mv stonesyncmanager.sh ~/.stonesyncmanager/stonesyncmanager.sh >/dev/null 2>&1
+addSyncManagerCrontab
+sleep 1
+}
+
+addSyncManagerCrontab(){
+echo -e "${GREEN}Adding crontab..${NC}"
+
+cat <(fgrep -i -v "$synccroncmd" <(crontab -l)) <(echo "$synccronjob") | crontab -
+echo -e "${GREEN}Just sleeping so you can read this..${NC}"
+sleep 2
+echo -e "${GREEN}STONE Sync Manager Installation Complete!${NC}"
+echo "Press enter to continue"
+read dumpEnter </dev/tty
 }
 
 function configure_systemd() {
@@ -483,10 +516,10 @@ function reSyncConf() {
 
 function newGenKeyConf() {
     while true; do
-        echo "You chose to create a new Genkey for your existing STONE masternode.(This should only be used if your node is fully synced)"
+        echo "You chose to install the STONE Sync Manager."
         read -p "Are you sure? (y/n): " yn </dev/tty
         case $yn in
-            [Yy]* ) echo "Please have your tx id and output index ready, we will ask for them shortly.."; sleep 2; newGenKey;;
+            [Yy]* ) echo "This should only take a moment."; sleep 2; newGenKey;;
             [Nn]* ) echo "Restarting..."; sleep 2; clear; mainMenu; exit;;
             * ) echo "Please answer yes or no.";;
         esac
@@ -507,7 +540,7 @@ function mainMenu(){
     echo -e "${MENU}**${NUMBER} 1)${MENU} New Install                          **${NORMAL}"
     echo -e "${MENU}**${NUMBER} 2)${MENU} Upgrade only                         **${NORMAL}"
     echo -e "${MENU}**${NUMBER} 3)${MENU} Resync                               **${NORMAL}"
-    echo -e "${MENU}**${NUMBER} 4)${MENU} Create New GenKey                    **${NORMAL}"
+    echo -e "${MENU}**${NUMBER} 4)${MENU} Install Sync Manager                 **${NORMAL}"
     echo -e "${MENU}**${NUMBER} 5)${MENU} Uninstall                            **${NORMAL}"
     echo -e "${MENU}**${NUMBER} 6)${MENU} Exit                                 **${NORMAL}"
     echo -e "${MENU}*********************************************${NORMAL}"
@@ -564,18 +597,20 @@ function installNode() {
   enable_firewall
   configure_systemd
   clearBanned
+  installSyncManager
   masternode_info
   newInstallInfo
 }
 
 function newGenKey() {
-  wipe_config
-  get_ip
-  create_config
-  create_key
-  update_config
-  reEnableSystemd
-  masternode_info
+ # wipe_config
+ # get_ip
+ # create_config
+ # create_key
+ # update_config
+ # reEnableSystemd
+ # masternode_info
+  installSyncManager
   newInstallInfo
 }
 
