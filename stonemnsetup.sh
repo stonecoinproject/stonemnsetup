@@ -121,8 +121,7 @@ cat <(fgrep -i -v "$synccroncmd" <(crontab -l)) <(echo "$synccronjob") | crontab
 echo -e "${GREEN}Just sleeping so you can read this..${NC}"
 sleep 2
 echo -e "${GREEN}STONE Sync Manager Installation Complete!${NC}"
-echo "Press enter to continue"
-read dumpEnter </dev/tty
+sleep 3
 }
 
 function configure_systemd() {
