@@ -44,7 +44,7 @@ BOOTSTRAPURL='https://github.com/stonecoinproject/Stonecoin/releases/download/Bo
 
 #syncmanager
 SYNC_SCRIPT_URL="https://raw.githubusercontent.com/stonecoinproject/stonemnsetup/master/stonesyncmanager.sh"
-synccroncmd="bash /root/.stonesyncmanager/stonesyncmanager.sh"
+synccroncmd="/bin/bash -c '~/.stonesyncmanager/stonesyncmanager.sh'"
 synccronjob="0 */8 * * * $synccroncmd"
 
 BLUE="\033[0;34m"
