@@ -14,6 +14,7 @@ isMnRunning
 
 checkServer(){
 echo "$(date +%F_%T) Pinging explorer.." >> ~/.stonesyncmanager/stonesync.log
+EXPBLOCK=$(curl -s4 "http://explorer.stonecoin.rocks/api/getblockcount")
 if [ "$EXPBLOCK" -eq "$EXPBLOCK" ];
 then
   echo "$(date +%F_%T) Successful ping!" >> ~/.stonesyncmanager/stonesync.log
@@ -33,7 +34,7 @@ sleep 2
 if [ $MNACTIVE = "active" ]; then
   echo "$(date +%F_%T) STONE service active!" >> ~/.stonesyncmanager/stonesync.log
   echo "$(date +%F_%T) Verifying block height.." >> ~/.stonesyncmanager/stonesync.log
-  isMnRunning
+  checkServer
   #printBlock
 else
   reEnableSystemd
