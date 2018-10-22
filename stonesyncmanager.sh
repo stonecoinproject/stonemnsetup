@@ -22,7 +22,7 @@ then
 else
   echo "$(date +%F_%T) **ERROR** STONE Explorer down, try again later!" >> ~/.stonesyncmanager/stonesync.log
   echo "$(date +%F_%T) Exiting!" >> ~/.stonesyncmanager/stonesync.log
-  exit
+  endLog
 fi
 }
 
@@ -41,6 +41,7 @@ else
 fi
 }
 
+
 printBlock(){
 MNBLOCK=$(stone-cli getblockcount)
   echo -e "$MNBLOCK"
@@ -48,17 +49,26 @@ MNBLOCK=$(stone-cli getblockcount)
 
 checkBlock(){
 MNBLOCK=$(stone-cli getblockcount)
+sleep 3
 EXPBLOCK=$(curl -s4 "http://explorer.stonecoin.rocks/api/getblockcount")
+sleep 3
 echo "$(date +%F_%T) Masternode Block $MNBLOCK" >> ~/.stonesyncmanager/stonesync.log
 echo "$(date +%F_%T) Explorer Block $EXPBLOCK" >> ~/.stonesyncmanager/stonesync.log
 EXPBLOCKLOW=$(expr $EXPBLOCK - 4)
 EXPBLOCKHIGH=$(expr $EXPBLOCK + 4)
-if [ "$MNBLOCK" -ge "$EXPBLOCKLOW" ] && [ "$MNBLOCK" -le "$EXPBLOCKHIGH" ]; then
-  echo "$(date +%F_%T) Block height matches A!" >> ~/.stonesyncmanager/stonesync.log
-  complete
+if [ -z "$MNBLOCK" ] 
+then
+  echo "$(date +%F_%T) Daemon not reporting data, if this persists a resinstall may be required!" >> ~/.stonesyncmanager/stonesync.log
+  echo "$(date +%F_%T) Exiting!" >> ~/.stonesyncmanager/stonesync.log
+  endLog
 else
-  echo "$(date +%F_%T) Block mismatch, double checking.." >> ~/.stonesyncmanager/stonesync.log
-  doubleCheckBlock
+  if [ "$MNBLOCK" -ge "$EXPBLOCKLOW" ] && [ "$MNBLOCK" -le "$EXPBLOCKHIGH" ]; then
+    echo "$(date +%F_%T) Block height matches!" >> ~/.stonesyncmanager/stonesync.log
+    complete
+  else
+    echo "$(date +%F_%T) Block mismatch, double checking.." >> ~/.stonesyncmanager/stonesync.log
+    doubleCheckBlock
+  fi
 fi
 }
 
@@ -72,7 +82,7 @@ echo "$(date +%F_%T) Explorer Block $EXPBLOCK" >> ~/.stonesyncmanager/stonesync.
 EXPBLOCKLOW=$(expr $EXPBLOCK - 4)
 EXPBLOCKHIGH=$(expr $EXPBLOCK + 4)
 if [ "$MNBLOCK" -ge "$EXPBLOCKLOW" ] && [ "$MNBLOCK" -le "$EXPBLOCKHIGH" ]; then
-  echo "$(date +%F_%T) Block Height matches B!" >> ~/.stonesyncmanager/stonesync.log
+  echo "$(date +%F_%T) Block Height matches!" >> ~/.stonesyncmanager/stonesync.log
   complete
 else
   echo "$(date +%F_%T) Confirmed out of sync, running resync function.." >> ~/.stonesyncmanager/stonesync.log
@@ -99,8 +109,13 @@ reEnableSystemd() {
     echo "$(date +%F_%T) ERROR Unable to start STONE service, Please re-install using the official script!" >> ~/.stonesyncmanager/stonesync.log
     echo "$(date +%F_%T) STONE masternode tutorial can be found here: https://github.com/stonecoinproject/stonemnsetup" >> ~/.stonesyncmanager/stonesync.log
     echo "$(date +%F_%T) Exiting!" >> ~/.stonesyncmanager/stonesync.log
-    exit
+    endLog
   fi
+}
+
+endLog(){
+echo "$(date +%F_%T) -------------------------------End Log-------------------------------" >> ~/.stonesyncmanager/stonesync.log
+exit
 }
 
 function reSync() {
@@ -145,7 +160,7 @@ startMasternode(){
 
 complete(){
   echo "$(date +%F_%T) STONE Sync Manager Complete!" >> ~/.stonesyncmanager/stonesync.log
-  exit
+  endLog
 }
 
 start
