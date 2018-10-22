@@ -46,6 +46,8 @@ BOOTSTRAPURL='https://github.com/stonecoinproject/Stonecoin/releases/download/Bo
 SYNC_SCRIPT_URL="https://raw.githubusercontent.com/stonecoinproject/stonemnsetup/master/stonesyncmanager.sh"
 synccroncmd="/bin/bash -c '~/.stonesyncmanager/stonesyncmanager.sh'"
 synccronjob="0 */8 * * * $synccroncmd"
+synccroncmdold="/bin/bash -c '~/.stonesyncmanager/stonesyncmanager.sh'"
+
 
 BLUE="\033[0;34m"
 YELLOW="\033[0;33m"
@@ -116,7 +118,8 @@ sleep 1
 
 addSyncManagerCrontab(){
 echo -e "${GREEN}Adding crontab..${NC}"
-
+( crontab -l | grep -v -F "$synccroncmdold" ) | crontab - >/dev/null 2>&1
+sleep 2
 cat <(fgrep -i -v "$synccroncmd" <(crontab -l)) <(echo "$synccronjob") | crontab -
 echo -e "${GREEN}Just sleeping so you can read this..${NC}"
 sleep 2

@@ -1,15 +1,15 @@
 #!/bin/bash
 
-EXPBLOCK=$(curl -s4 "http://explorer.stonecoin.rocks/api/getblockcount")
+#EXPBLOCK=$(curl -s4 "http://explorer.stonecoin.rocks/api/getblockcount")
 #EXPBLOCK="1500000" #used for mismatch testing
-EXPBLOCKLOW=$(expr $EXPBLOCK - 3)
-EXPBLOCKHIGH=$(expr $EXPBLOCK + 3)
+#EXPBLOCKLOW=$(expr $EXPBLOCK - 4)
+#EXPBLOCKHIGH=$(expr $EXPBLOCK + 4)
 
 BOOTSTRAPURL='https://github.com/stonecoinproject/Stonecoin/releases/download/Bootstrapv2.0/stonecore.tar.gz'
 
 start(){
 echo "$(date +%F_%T) **Initializing STONE Sync Manager**" >> ~/.stonesyncmanager/stonesync.log
-checkServer
+isMnRunning
 }
 
 checkServer(){
@@ -17,7 +17,7 @@ echo "$(date +%F_%T) Pinging explorer.." >> ~/.stonesyncmanager/stonesync.log
 if [ "$EXPBLOCK" -eq "$EXPBLOCK" ];
 then
   echo "$(date +%F_%T) Successful ping!" >> ~/.stonesyncmanager/stonesync.log
-  isMnRunning
+  checkBlock
 else
   echo "$(date +%F_%T) **ERROR** STONE Explorer down, try again later!" >> ~/.stonesyncmanager/stonesync.log
   echo "$(date +%F_%T) Exiting!" >> ~/.stonesyncmanager/stonesync.log
@@ -33,7 +33,7 @@ sleep 2
 if [ $MNACTIVE = "active" ]; then
   echo "$(date +%F_%T) STONE service active!" >> ~/.stonesyncmanager/stonesync.log
   echo "$(date +%F_%T) Verifying block height.." >> ~/.stonesyncmanager/stonesync.log
-  checkBlock
+  isMnRunning
   #printBlock
 else
   reEnableSystemd
@@ -47,8 +47,13 @@ MNBLOCK=$(stone-cli getblockcount)
 
 checkBlock(){
 MNBLOCK=$(stone-cli getblockcount)
+EXPBLOCK=$(curl -s4 "http://explorer.stonecoin.rocks/api/getblockcount")
+echo "$(date +%F_%T) Masternode Block $MNBLOCK" >> ~/.stonesyncmanager/stonesync.log
+echo "$(date +%F_%T) Explorer Block $EXPBLOCK" >> ~/.stonesyncmanager/stonesync.log
+EXPBLOCKLOW=$(expr $EXPBLOCK - 4)
+EXPBLOCKHIGH=$(expr $EXPBLOCK + 4)
 if [ "$MNBLOCK" -ge "$EXPBLOCKLOW" ] && [ "$MNBLOCK" -le "$EXPBLOCKHIGH" ]; then
-  echo "$(date +%F_%T) Block height matches!A" >> ~/.stonesyncmanager/stonesync.log
+  echo "$(date +%F_%T) Block height matches A!" >> ~/.stonesyncmanager/stonesync.log
   complete
 else
   echo "$(date +%F_%T) Block mismatch, double checking.." >> ~/.stonesyncmanager/stonesync.log
@@ -58,9 +63,15 @@ fi
 
 
 doubleCheckBlock(){
-sleep 30
+sleep 60
+MNBLOCK=$(stone-cli getblockcount)
+EXPBLOCK=$(curl -s4 "http://explorer.stonecoin.rocks/api/getblockcount")
+echo "$(date +%F_%T) Masternode Block $MNBLOCK" >> ~/.stonesyncmanager/stonesync.log
+echo "$(date +%F_%T) Explorer Block $EXPBLOCK" >> ~/.stonesyncmanager/stonesync.log
+EXPBLOCKLOW=$(expr $EXPBLOCK - 4)
+EXPBLOCKHIGH=$(expr $EXPBLOCK + 4)
 if [ "$MNBLOCK" -ge "$EXPBLOCKLOW" ] && [ "$MNBLOCK" -le "$EXPBLOCKHIGH" ]; then
-  echo "$(date +%F_%T) Block Height matches!B" >> ~/.stonesyncmanager/stonesync.log
+  echo "$(date +%F_%T) Block Height matches B!" >> ~/.stonesyncmanager/stonesync.log
   complete
 else
   echo "$(date +%F_%T) Confirmed out of sync, running resync function.." >> ~/.stonesyncmanager/stonesync.log
@@ -81,7 +92,7 @@ reEnableSystemd() {
   if [ $MNACTIVE = "active" ]; then
     echo "$(date +%F_%T) STONE service active!" >> ~/.stonesyncmanager/stonesync.log
     echo "$(date +%F_%T) Verifying block height.." >> ~/.stonesyncmanager/stonesync.log
-    checkBlock
+    isMnRunning
     #printBlock
   else
     echo "$(date +%F_%T) ERROR Unable to start STONE service, Please re-install using the official script!" >> ~/.stonesyncmanager/stonesync.log
