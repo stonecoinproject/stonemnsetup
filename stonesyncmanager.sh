@@ -10,7 +10,7 @@ BOOTSTRAPURL='https://github.com/stonecoinproject/Stonecoin/releases/download/Bo
 
 start(){
 echo "$(date +%F_%T) **Initializing STONE Sync Manager**" >> ~/.stonesyncmanager/stonesync.log
-sleep $[ ( $RANDOM % 3600 )  + 1 ]s
+sleep $[ ( $RANDOM % 10 )  + 1 ]s
 isMnRunning
 }
 
