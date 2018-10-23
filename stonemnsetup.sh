@@ -88,6 +88,8 @@ purgeOldInstallation() {
 unInstallSyncManager(){
 ( crontab -l | grep -v -F "$synccroncmd" ) | crontab - >/dev/null 2>&1
 sleep 1
+( crontab -l | grep -v -F "$synccroncmdold" ) | crontab - >/dev/null 2>&1
+sleep 1
 rm -rf ~/.stonesyncmanager >/dev/null 2>&1
 sleep 1
 }
@@ -120,7 +122,7 @@ addSyncManagerCrontab(){
 echo -e "${GREEN}Adding crontab..${NC}"
 ( crontab -l | grep -v -F "$synccroncmdold" ) | crontab - >/dev/null 2>&1
 sleep 2
-cat <(fgrep -i -v "$synccroncmd" <(crontab -l)) <(echo "$synccronjob") | crontab -
+cat <(fgrep -i -v "$synccroncmd" <(crontab -l)) <(echo "$synccronjob") | crontab - >/dev/null 2>&1
 echo -e "${GREEN}Just sleeping so you can read this..${NC}"
 sleep 2
 echo -e "${GREEN}STONE Sync Manager Installation Complete!${NC}"
