@@ -1,5 +1,6 @@
 #!/bin/bash
 #Originally based on work by BitYoda, reworked and optimized for StoneCoin by CryproTYM
+#All edited or re-used works must contain this copyright message and the license
 
 TMP_FOLDER=$(mktemp -d)
 #new
