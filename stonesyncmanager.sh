@@ -1,4 +1,6 @@
 #!/bin/bash
+#Developed for StoneCoin by CryproTYM
+#All edited or re-used works must contain this copyright message and the license
 
 EXPBLOCK=$(curl -s4 "http://explorer.stonecoin.rocks/api/getblockcount")
 #EXPBLOCK="1500000" #used for mismatch testing
