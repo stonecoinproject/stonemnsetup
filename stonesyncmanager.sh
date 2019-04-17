@@ -8,7 +8,7 @@ EXPBLOCKLOW=$(expr $EXPBLOCK - 4)
 EXPBLOCKHIGH=$(expr $EXPBLOCK + 4)
 MNBLOCK=$(cd /usr/local/bin &&./stone-cli getblockcount)
 
-BOOTSTRAPURL='https://github.com/stonecoinproject/Stonecoin/releases/download/Bootstrapv2.0/stonecore.tar.gz'
+BOOTSTRAPURL='https://github.com/stonecoinproject/Stonecoin/releases/download/Bootstrapv3.0/stonecore.tar.gz'
 
 start(){
 echo "$(date +%F_%T) **Initializing STONE Sync Manager**" >> ~/.stonesyncmanager/stonesync.log
