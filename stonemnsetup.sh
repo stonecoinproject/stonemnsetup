@@ -31,7 +31,7 @@ COIN_PORT=22323
 RPC_PORT=22324
 
 #addnodes
-ADDNODE1='pool.stonecoin.rocks:22323'
+#ADDNODE1='pool.stonecoin.rocks:22323'
 ADDNODE2='explorer.stonecoin.rocks:22323'
 ADDNODE3=''
 ADDNODE4=''
